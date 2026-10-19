@@ -1,0 +1,8 @@
+# Build output - regenerated every day, never committed
+site/
+# Raw upstream responses cached for retries and local iteration
+.cache/
+# Preview covers and other generated files
+generated/
+__pycache__/
+*.pyc

@@ -1,0 +1,61 @@
+name: daily-price-collection
+
+on:
+  schedule:
+    # 06:00 UTC every day. The Okou agent workflow rebuilds and redeploys the live site afterwards.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-price-collection
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Pure standard library: no dependency install step to break.
+      - name: Collect today's prices
+        run: python3 src/fetch_data.py --if-missing
+
+      - name: Check provider pricing pages for drift
+        run: python3 src/check_providers.py
+        continue-on-error: true
+
+      - name: Build the site
+        run: python3 src/build_site.py --out site
+
+      - name: Quality gate
+        run: python3 src/qa_check.py --out site
+
+      - name: Run tests
+        run: python3 -m unittest discover tests
+
+      - name: Commit the day's data
+        run: |
+          git config user.name "cloudcost-radar-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data api
+          if git diff --cached --quiet; then
+            echo "no data change to commit"
+          else
+            git commit -m "chore(data): daily snapshot $(date -u +%F)"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: Upload the built site as a workflow artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ github.run_id }}
+          path: site
+          retention-days: 5

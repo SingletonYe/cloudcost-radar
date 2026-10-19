@@ -1,0 +1,51 @@
+{
+  "name": "CloudCost Radar",
+  "short_name": "CloudCost Radar",
+  "tagline": "Daily AWS compute prices, spot moves and cheaper-alternative math",
+  "base_url": "https://cloudcost-radar.okou.app",
+  "description": "CloudCost Radar tracks AWS EC2 on-demand, spot and reserved prices across 20 regions every day, and compares them with cheaper cloud and VPS alternatives. Free daily price data, spot-price movers and a savings calculator.",
+  "contact_email": "peiqing6888@gmail.com",
+  "github_repo": "https://github.com/SingletonYe/cloudcost-radar",
+  "primary_region": "us-east-1",
+  "spot_history_regions": [
+    "us-east-1",
+    "us-east-2",
+    "us-west-2",
+    "eu-west-1",
+    "eu-central-1",
+    "ap-southeast-1",
+    "ap-northeast-1",
+    "ap-south-1"
+  ],
+  "ads": {
+    "provider": "adsense",
+    "client": "",
+    "enabled": false,
+    "slots": {
+      "home_top": "",
+      "home_bottom": "",
+      "instance_side": "",
+      "alternatives_top": ""
+    }
+  },
+  "analytics": {
+    "provider": "cloudflare",
+    "token": "",
+    "enabled": false
+  },
+  "newsletter": {
+    "provider": "supabase",
+    "supabase_url": "",
+    "supabase_anon_key": "",
+    "table": "subscribers",
+    "enabled": false
+  },
+  "disclosure": "CloudCost Radar is reader-supported. Some links to cloud providers are referral links: if you sign up we may earn a credit at no extra cost to you. Referral partnerships never affect prices, rankings or recommendations, which are computed from published provider pricing data.",
+  "data_sources": [
+    {
+      "name": "ec2.shop public EC2 price API",
+      "url": "https://ec2.shop",
+      "note": "Machine-readable AWS EC2 on-demand, spot and reserved prices, region by region."
+    }
+  ]
+}

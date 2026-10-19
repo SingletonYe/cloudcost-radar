@@ -1,0 +1,92 @@
+{
+  "contabo": {
+    "first_seen": "2026-10-19",
+    "http": "http_403",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": null,
+    "url": "https://contabo.com/en/vps/"
+  },
+  "digitalocean": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "8918e5d33381156c",
+    "url": "https://www.digitalocean.com/pricing/droplets"
+  },
+  "hetzner": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "dd9a724e5333bcd8",
+    "url": "https://www.hetzner.com/cloud/"
+  },
+  "lightsail": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "739cb89a4af0e893",
+    "url": "https://aws.amazon.com/lightsail/pricing/"
+  },
+  "linode": {
+    "first_seen": "2026-10-19",
+    "http": "http_403",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": null,
+    "url": "https://www.linode.com/pricing/"
+  },
+  "oracle-cloud": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "c8fee35f34ac2353",
+    "url": "https://www.oracle.com/cloud/price-list/"
+  },
+  "ovhcloud": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "c5ddbcaddb5824e3",
+    "url": "https://www.ovhcloud.com/en/vps/"
+  },
+  "runpod": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "49f5693230b9ac34",
+    "url": "https://www.runpod.io/pricing"
+  },
+  "scaleway": {
+    "first_seen": "2026-10-19",
+    "http": "ok:200",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": "69f0683414ac522b",
+    "url": "https://www.scaleway.com/en/pricing/"
+  },
+  "vultr": {
+    "first_seen": "2026-10-19",
+    "http": "http_403",
+    "last_changed": "2026-10-19",
+    "last_checked": "2026-10-19",
+    "needs_price_review": false,
+    "sha256": null,
+    "url": "https://www.vultr.com/pricing/"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "_readme": [
+    "Curated comparison catalog. Every entry carries how its price was established:",
+    "price_status 'verified' means an agent fetched the provider's published pricing table",
+    "and recorded the number with a verified_at date. 'verify_live' means the published",
+    "number could not be machine-read reliably (JS-gated page) and the site must NOT show",
+    "a number: it links to the live pricing page instead. Never type a remembered price here.",
+    "src/check_providers.py re-fetches every verify_url daily and flags drift."
+  ],
+  "catalog_checked_at": "2026-10-19",
+  "providers": [
+    {
+      "id": "digitalocean",
+      "name": "DigitalOcean",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.digitalocean.com/pricing/droplets",
+      "notes": "SSD-backed droplets with hourly billing and a generous free egress allowance.",
+      "plans": [
+        { "id": "s-1vcpu-1gb", "vcpu": 1, "ram_gb": 1, "disk_gb": 25, "transfer_gb": 1000, "price_usd_month": 6.0, "price_status": "verified", "verified_at": "2026-10-19" },
+        { "id": "s-2vcpu-2gb", "vcpu": 2, "ram_gb": 2, "disk_gb": 60, "transfer_gb": 3000, "price_usd_month": 18.0, "price_status": "verified", "verified_at": "2026-10-19" },
+        { "id": "s-2vcpu-4gb", "vcpu": 2, "ram_gb": 4, "disk_gb": 80, "transfer_gb": 4000, "price_usd_month": 24.0, "price_status": "verified", "verified_at": "2026-10-19" },
+        { "id": "s-4vcpu-8gb", "vcpu": 4, "ram_gb": 8, "disk_gb": 160, "transfer_gb": 5000, "price_usd_month": 48.0, "price_status": "verified", "verified_at": "2026-10-19" },
+        { "id": "s-8vcpu-16gb", "vcpu": 8, "ram_gb": 16, "disk_gb": 320, "transfer_gb": 6000, "price_usd_month": 96.0, "price_status": "verified", "verified_at": "2026-10-19" }
+      ]
+    },
+    {
+      "id": "hetzner",
+      "name": "Hetzner Cloud",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.hetzner.com/cloud/",
+      "notes": "EU and US locations, hourly billing, prices published in EUR and rendered by JavaScript.",
+      "plans": [
+        { "id": "shared", "vcpu": 2, "ram_gb": 4, "disk_gb": 40, "transfer_gb": 20000, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "vultr",
+      "name": "Vultr",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.vultr.com/pricing/",
+      "notes": "High-frequency compute tiers with hourly billing across many regions.",
+      "plans": [
+        { "id": "regular", "vcpu": 1, "ram_gb": 1, "disk_gb": 25, "transfer_gb": 1000, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "linode",
+      "name": "Akamai / Linode",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.linode.com/pricing/",
+      "notes": "Shared and dedicated CPU plans, hourly billing.",
+      "plans": [
+        { "id": "nanode", "vcpu": 1, "ram_gb": 1, "disk_gb": 25, "transfer_gb": 1000, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "scaleway",
+      "name": "Scaleway",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.scaleway.com/en/pricing/",
+      "notes": "European cloud with per-second billing on several instance families.",
+      "plans": [
+        { "id": "dev1-s", "vcpu": 2, "ram_gb": 2, "disk_gb": 20, "transfer_gb": 0, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "ovhcloud",
+      "name": "OVHcloud VPS",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.ovhcloud.com/en/vps/",
+      "notes": "Fixed-monthly VPS range with unmetered-ish traffic allowances.",
+      "plans": [
+        { "id": "vps-entry", "vcpu": 2, "ram_gb": 4, "disk_gb": 80, "transfer_gb": 0, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "contabo",
+      "name": "Contabo",
+      "kind": "cloud-vps",
+      "verify_url": "https://contabo.com/en/vps/",
+      "notes": "Very high RAM-per-dollar VPS plans; long contracts and setup fees apply.",
+      "plans": [
+        { "id": "cloud-vps", "vcpu": 4, "ram_gb": 8, "disk_gb": 200, "transfer_gb": 32000, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "lightsail",
+      "name": "Amazon Lightsail",
+      "kind": "cloud-vps",
+      "verify_url": "https://aws.amazon.com/lightsail/pricing/",
+      "notes": "AWS's own fixed-price VPS tier: the cheapest legitimate way to stay on AWS.",
+      "plans": [
+        { "id": "2gb", "vcpu": 2, "ram_gb": 2, "disk_gb": 60, "transfer_gb": 3000, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "oracle-cloud",
+      "name": "Oracle Cloud Infrastructure",
+      "kind": "cloud-vps",
+      "verify_url": "https://www.oracle.com/cloud/price-list/",
+      "notes": "Has an Always Free tier; ARM Ampere capacity is often unavailable in practice.",
+      "plans": [
+        { "id": "always-free", "vcpu": 4, "ram_gb": 24, "disk_gb": 200, "transfer_gb": 10240, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    },
+    {
+      "id": "runpod",
+      "name": "RunPod",
+      "kind": "gpu-cloud",
+      "verify_url": "https://www.runpod.io/pricing",
+      "notes": "GPU rental for the workloads where EC2 GPU instances are most expensive.",
+      "plans": [
+        { "id": "gpu-community", "vcpu": 0, "ram_gb": 0, "disk_gb": 0, "transfer_gb": 0, "price_usd_month": null, "price_status": "verify_live", "verified_at": null }
+      ]
+    }
+  ]
+}

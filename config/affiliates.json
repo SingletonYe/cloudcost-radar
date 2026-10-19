@@ -1,0 +1,106 @@
+{
+  "_readme": [
+    "Fill in ref_url for each program after you are accepted. Until a program has a",
+    "real ref_url, the site links to the provider's normal pricing page with no tracking",
+    "and shows no 'referral' badge. Never paste a guessed or placeholder code here:",
+    "qa_check.py fails the build if a placeholder code is present.",
+    "commission_note is free text shown only in MONETIZATION docs, not on the site."
+  ],
+  "programs": [
+    {
+      "id": "digitalocean",
+      "name": "DigitalOcean",
+      "status": "open",
+      "ref_url": "",
+      "public_url": "https://www.digitalocean.com/pricing/droplets",
+      "commission_note": "Public referral program (credit for referrer once the referred account spends a threshold). Confirm current terms in your Referral dashboard.",
+      "payout_model": "account credit",
+      "notes": "Approval is usually instant through the DigitalOcean referral dashboard."
+    },
+    {
+      "id": "vultr",
+      "name": "Vultr",
+      "status": "open",
+      "ref_url": "",
+      "public_url": "https://www.vultr.com/pricing/",
+      "commission_note": "Referral credit program. Confirm current terms in your account.",
+      "payout_model": "account credit",
+      "notes": ""
+    },
+    {
+      "id": "hetzner",
+      "name": "Hetzner Cloud",
+      "status": "no_public_program",
+      "ref_url": "",
+      "public_url": "https://www.hetzner.com/cloud/",
+      "commission_note": "Hetzner does not run a general public affiliate program; link normally.",
+      "payout_model": "none",
+      "notes": "Keep as a plain editorial link to stay credible on price."
+    },
+    {
+      "id": "linode",
+      "name": "Akamai / Linode",
+      "status": "verify",
+      "ref_url": "",
+      "public_url": "https://www.linode.com/pricing/",
+      "commission_note": "Check whether the current Akamai referral or partner program accepts self-serve publishers.",
+      "payout_model": "check",
+      "notes": ""
+    },
+    {
+      "id": "scaleway",
+      "name": "Scaleway",
+      "status": "verify",
+      "ref_url": "",
+      "public_url": "https://www.scaleway.com/en/pricing/",
+      "commission_note": "Referral credit exists in some regions; confirm eligibility.",
+      "payout_model": "check",
+      "notes": ""
+    },
+    {
+      "id": "ovhcloud",
+      "name": "OVHcloud",
+      "status": "verify",
+      "ref_url": "",
+      "public_url": "https://www.ovhcloud.com/en/vps/",
+      "commission_note": "Check current referral partner terms.",
+      "payout_model": "check",
+      "notes": ""
+    },
+    {
+      "id": "cloudways",
+      "name": "Cloudways",
+      "status": "open",
+      "ref_url": "",
+      "public_url": "https://www.cloudways.com/en/pricing.php",
+      "commission_note": "Managed hosting affiliate program with published per-sale payouts. Confirm current tiers in the affiliate dashboard.",
+      "payout_model": "per sale",
+      "notes": "Good fit for the managed-hosting alternative section."
+    },
+    {
+      "id": "hostinger",
+      "name": "Hostinger (VPS)",
+      "status": "open",
+      "ref_url": "",
+      "public_url": "https://www.hostinger.com/vps-hosting",
+      "commission_note": "High per-sale affiliate tiers for VPS and hosting. Confirm current tiers in the affiliate dashboard.",
+      "payout_model": "per sale",
+      "notes": ""
+    },
+    {
+      "id": "runpod",
+      "name": "RunPod",
+      "status": "verify",
+      "ref_url": "",
+      "public_url": "https://www.runpod.io/pricing",
+      "commission_note": "GPU cloud referral program; confirm publisher eligibility.",
+      "payout_model": "check",
+      "notes": "Use for the GPU-instance alternative section."
+    }
+  ],
+  "policy": {
+    "paid_placements_never_affect_rankings": true,
+    "link_rel": "sponsored nofollow noopener",
+    "disclosure_path": "/affiliate-disclosure/"
+  }
+}
