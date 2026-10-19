@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -25,6 +26,24 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "providers"
 USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
               "Chrome/124.0 Safari/537.36 CloudCostRadar/1.0")
+
+SCRIPT_RE = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)
+WS_RE = re.compile(r"\s+")
+PRICE_RE = re.compile(r"[$€£]\s?\d[\d.,]*")
+
+
+def normalize(body: bytes) -> str:
+    """Strip scripts/styles and collapse whitespace so per-request noise (tokens, ads, inline
+    state) does not look like a price change."""
+    text = body.decode("utf-8", errors="ignore")
+    text = SCRIPT_RE.sub(" ", text)
+    return WS_RE.sub(" ", text).strip()
+
+
+def price_tokens(normalized: str) -> list[str]:
+    """The money-like strings on the page: the signal that actually matters."""
+    tokens = {match.group(0).replace(" ", "").rstrip(".,") for match in PRICE_RE.finditer(normalized)}
+    return sorted(tokens)
 
 
 def fetch(url: str, timeout: int = 30) -> tuple[str, bytes | None]:
@@ -56,24 +75,39 @@ def main() -> int:
         pid = prov["id"]
         url = prov["verify_url"]
         result, body = fetch(url)
-        digest = hashlib.sha256(body).hexdigest()[:16] if body else None
+        normalized = normalize(body) if body else ""
+        digest = hashlib.sha256(normalized.encode()).hexdigest()[:16] if normalized else None
+        tokens = price_tokens(normalized) if normalized else []
+        token_hash = hashlib.sha256("|".join(tokens).encode()).hexdigest()[:16] if tokens else None
         old = previous.get(pid, {})
-        changed = bool(digest and old.get("sha256") and digest != old.get("sha256"))
+        body_changed = bool(digest and old.get("normalized_sha256") and digest != old["normalized_sha256"])
+        # Fall back to the older key name so the first run after this change still compares correctly.
+        if not body_changed and digest and old.get("sha256") and digest != old["sha256"]:
+            body_changed = True
+        prices_changed = bool(token_hash and old.get("price_tokens_sha256")
+                              and token_hash != old["price_tokens_sha256"])
         entry = {
             "url": url,
             "http": result,
-            "sha256": digest,
+            "normalized_sha256": digest,
+            "price_tokens_sha256": token_hash,
+            "price_token_count": len(tokens),
             "last_checked": today,
             "first_seen": old.get("first_seen") or today,
-            "last_changed": today if changed or not old.get("sha256") else old.get("last_changed"),
-            "needs_price_review": bool(changed or old.get("needs_price_review")),
+            "last_body_change": today if body_changed else old.get("last_body_change"),
+            "last_price_change": today if prices_changed else old.get("last_price_change"),
+            "needs_price_review": bool(prices_changed or old.get("needs_price_review")),
         }
         status[pid] = entry
-        if changed:
+        if prices_changed:
             changes.append({"provider": pid, "url": url, "detected": today,
-                            "previous_sha256": old.get("sha256"), "current_sha256": digest})
-        print(f"  {pid:14s} {result:10s} hash={digest or '-':16s}"
-              f"{' CHANGED - re-verify published price' if changed else ''}")
+                            "reason": "price tokens changed",
+                            "previous_tokens": old.get("price_token_count"),
+                            "current_tokens": len(tokens)})
+        flag = "PRICES CHANGED - re-verify published price before trusting the catalog" if prices_changed \
+            else ("page changed, prices identical" if body_changed else "")
+        print(f"  {pid:14s} {result:10s} tokens={len(tokens):4d} "
+              f"hash={token_hash or '-':16s}{flag}")
 
     DATA.mkdir(parents=True, exist_ok=True)
     status_path.write_text(json.dumps(status, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -82,7 +116,7 @@ def main() -> int:
              "changes": changes}
     (DATA / f"audit-{today}.json").write_text(json.dumps(audit, indent=2) + "\n", encoding="utf-8")
 
-    print(f"checked {len(status)} provider pages, {len(changes)} changed, "
+    print(f"checked {len(status)} provider pages, {len(changes)} with changed prices, "
           f"{len(audit['unreachable'])} unreachable")
     return 0
 

@@ -14,7 +14,10 @@ tests, publishes — or refuses to publish if validation fails.
 ## Why this can earn money
 
 See **[MONETIZATION.md](MONETIZATION.md)** for the full plan with sourced program terms and the
-arithmetic to $50/day. The short version:
+arithmetic to $50/day, and **[research/SEO_VALIDATION.md](research/SEO_VALIDATION.md)** for measured
+search demand in this niche (VPS terms carry $15-26 CPC; the FinOps SaaS companies already competing
+for per-instance pricing queries are independent evidence the traffic is worth money). The short
+version:
 
 - **The audience is high intent.** People searching "m7i.large price" or "cheapest 4 vCPU 16 GB
   instance" are choosing where to spend money on infrastructure every month.
