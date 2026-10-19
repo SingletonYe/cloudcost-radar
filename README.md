@@ -53,17 +53,21 @@ The deployable artefact is a folder of static files.
 
 ### What gets generated
 
-| Path | Purpose |
+The host serves exact file paths (no directory-index rewriting), so pages use flat `.html` URLs.
+Internally the builder works in logical paths and rewrites links, canonical URLs and the sitemap to
+the flat form; `qa_check.py` fails the build if the two ever disagree.
+
+| URL | Purpose |
 |---|---|
 | `/` | Today's board: biggest spot drops, cheapest instance per size class, savings calculator |
-| `/instances/` | All 867 instance types, filterable and sortable |
-| `/instances/<type>/` | One page per instance type: all purchase models, per-region prices, FAQ |
-| `/spot/` | Spot tracker: today's movers, spot-vs-on-demand discounts, reclaim risk |
-| `/regions/`, `/regions/<code>/` | Cheapest instance per size class, per region |
-| `/cheapest/<n>-vcpu-<n>gb/` | "Cheapest 4 vCPU 16 GB instance" style intent pages |
-| `/gpu/`, `/pricing-changes/`, `/calculator/` | GPU pricing, the change log, the cost calculator |
-| `/alternatives/`, `/compare/...` | The commercial pages, with verified prices and disclosure |
-| `/api/` | Documents the free daily JSON feed |
+| `/instances.html` | All 867 instance types, filterable and sortable |
+| `/instances/<type>.html` | One page per instance type: all purchase models, per-region prices, FAQ |
+| `/spot.html` | Spot tracker: today's movers, spot-vs-on-demand discounts, reclaim risk |
+| `/regions.html`, `/regions/<code>.html` | Cheapest instance per size class, per region |
+| `/cheapest/<n>-vcpu-<n>gb.html` | "Cheapest 4 vCPU 16 GB instance" style intent pages |
+| `/gpu.html`, `/pricing-changes.html`, `/calculator.html` | GPU pricing, the change log, the calculator |
+| `/alternatives.html`, `/compare/<a>-vs-<b>.html` | The commercial pages, with verified prices and disclosure |
+| `/api.html` | Documents the free daily JSON feed (`api/v1/*.json` in this repo) |
 
 ---
 
@@ -158,7 +162,7 @@ and that no ad markup appears while ads are disabled.
 ## Data sources and honesty rules
 
 - Prices come from the public, keyless [ec2.shop](https://ec2.shop) EC2 price API, which mirrors AWS's
-  published price list files. Read the **methodology page** (`/methodology/`) for the exact checks.
+  published price list files. Read the **methodology page** (`/methodology.html`) for the exact checks.
 - AWS prices are list prices, not billing records. Every page carries a "confirm with the provider"
   notice and an explicit statement that this site is not affiliated with AWS.
 - Provider prices are only shown when they were machine-verified; everything else says "check
