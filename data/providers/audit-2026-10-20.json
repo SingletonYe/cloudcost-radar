@@ -7,11 +7,5 @@
     "contabo"
   ],
   "changes": [],
-  "verified_dates_refreshed": [
-    "s-1vcpu-1gb",
-    "s-2vcpu-2gb",
-    "s-2vcpu-4gb",
-    "s-4vcpu-8gb",
-    "s-8vcpu-16gb"
-  ]
+  "verified_dates_refreshed": []
 }

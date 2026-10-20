@@ -42,7 +42,7 @@
     "last_checked": "2026-10-20",
     "last_price_change": null,
     "needs_price_review": false,
-    "normalized_sha256": "4f261c7eef45b1b9",
+    "normalized_sha256": "e25988fa8fd7e55a",
     "price_token_count": 126,
     "price_tokens_sha256": "c635f9c0d97c2d65",
     "url": "https://aws.amazon.com/lightsail/pricing/"
@@ -102,7 +102,7 @@
     "last_checked": "2026-10-20",
     "last_price_change": null,
     "needs_price_review": false,
-    "normalized_sha256": "827990a04371aa77",
+    "normalized_sha256": "e561ef7585e2b6b1",
     "price_token_count": 5,
     "price_tokens_sha256": "264aa219c41b8507",
     "url": "https://www.scaleway.com/en/pricing/"
