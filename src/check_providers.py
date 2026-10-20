@@ -58,9 +58,56 @@ def fetch(url: str, timeout: int = 30) -> tuple[str, bytes | None]:
         return f"error:{type(exc).__name__}", None
 
 
+def refresh_verified_dates(catalog_path: Path, status: dict, today: str,
+                           previous: dict) -> list[str]:
+    """Bump `verified_at` for plans whose provider page still shows the same price tokens.
+
+    This only ever refreshes a *date*: the price itself is never written here. It is only safe
+    because the set and count of money-like tokens on the provider's pricing page are identical
+    to the run that verified the number, i.e. the published figures provably have not moved.
+    """
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    raw = catalog_path.read_text(encoding="utf-8")
+    targets: set[str] = set()
+    for prov in catalog.get("providers", []):
+        entry = status.get(prov["id"], {})
+        old = previous.get(prov["id"], {})
+        stable = (entry.get("price_tokens_sha256")
+                  and entry.get("price_tokens_sha256") == old.get("price_tokens_sha256")
+                  and entry.get("price_token_count") == old.get("price_token_count"))
+        if not stable:
+            continue
+        for plan in prov.get("plans", []):
+            if plan.get("price_status") == "verified" and plan.get("verified_at") != today:
+                targets.add(plan["id"])
+
+    refreshed: list[str] = []
+    if not targets:
+        return refreshed
+    # Edit the date in place so a daily refresh does not churn the file's formatting.
+    out_lines = []
+    for line in raw.splitlines(keepends=True):
+        match = re.search(r'"id":\s*"([^"]+)"', line)
+        if (match and match.group(1) in targets and '"verified_at"' in line
+                and '"verified_at": null' not in line):
+            plan_id = match.group(1)
+            new_line, count = re.subn(r'"verified_at":\s*"[^"]*"',
+                                      f'"verified_at": "{today}"', line)
+            if count:
+                out_lines.append(new_line)
+                refreshed.append(plan_id)
+                continue
+        out_lines.append(line)
+    if refreshed:
+        catalog_path.write_text("".join(out_lines), encoding="utf-8")
+    return refreshed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", help="Override the check date (YYYY-MM-DD).")
+    parser.add_argument("--no-refresh-verified-dates", action="store_true",
+                        help="Do not bump verified_at dates (dry run for the config).")
     args = parser.parse_args()
 
     now = datetime.now(timezone.utc)
@@ -116,8 +163,18 @@ def main() -> int:
              "changes": changes}
     (DATA / f"audit-{today}.json").write_text(json.dumps(audit, indent=2) + "\n", encoding="utf-8")
 
+    refreshed: list[str] = []
+    if not args.no_refresh_verified_dates:
+        refreshed = refresh_verified_dates(ROOT / "config" / "alternatives.json", status,
+                                           today, previous)
+    audit["verified_dates_refreshed"] = refreshed
+    (DATA / f"audit-{today}.json").write_text(json.dumps(audit, indent=2) + "\n", encoding="utf-8")
+
     print(f"checked {len(status)} provider pages, {len(changes)} with changed prices, "
           f"{len(audit['unreachable'])} unreachable")
+    if refreshed:
+        print(f"re-dated {len(refreshed)} verified plan price(s) as still current: "
+              f"{', '.join(refreshed)}")
     return 0
 
 

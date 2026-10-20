@@ -71,6 +71,41 @@ class TestNormalisation(unittest.TestCase):
         self.assertFalse(fetch_data.is_watchlisted("nonsense"))
 
 
+class TestFreshnessDetection(unittest.TestCase):
+    """The collector must be able to prove the upstream stopped republishing."""
+
+    def test_spot_history_hash_is_order_independent(self):
+        a = {"us-east-1": {"m7i.large": 0.04, "c6i.large": 0.03}}
+        b = {"us-east-1": {"c6i.large": 0.03, "m7i.large": 0.04}}
+        self.assertEqual(fetch_data.hash_spot_regions(a), fetch_data.hash_spot_regions(b))
+
+    def test_spot_history_hash_detects_a_price_move(self):
+        a = {"us-east-1": {"m7i.large": 0.04}}
+        b = {"us-east-1": {"m7i.large": 0.05}}
+        self.assertNotEqual(fetch_data.hash_spot_regions(a), fetch_data.hash_spot_regions(b))
+
+    def test_live_meta_is_internally_consistent(self):
+        meta = json.loads((ROOT / "data" / "latest" / "meta.json").read_text())
+        self.assertIn("upstream_unchanged", meta)
+        if meta["upstream_unchanged"]:
+            self.assertLess(meta["upstream_since"], meta["date"],
+                            "an unchanged payload must have been first seen before today")
+            self.assertGreaterEqual(meta["upstream_unchanged_days"], 1)
+            self.assertEqual(meta["previous_spot_watchlist_sha256"],
+                             meta["today_spot_watchlist_sha256"])
+
+    def test_stale_source_forces_a_disclosure(self):
+        """Rendering must produce the disclosure whenever meta marks the payload unchanged."""
+        builder = site_base.Builder(ROOT / "site")
+        builder.meta = {"upstream_unchanged": True, "upstream_since": "2026-10-19",
+                        "upstream_unchanged_days": 2}
+        notice = builder.freshness_notice()
+        self.assertIn("has not published a new snapshot since", notice)
+        self.assertIn("will not present an unchanged snapshot", notice)
+        builder.meta = {"upstream_unchanged": False}
+        self.assertEqual(builder.freshness_notice(), "")
+
+
 class TestRendering(unittest.TestCase):
     def test_escape(self):
         self.assertEqual(site_base.esc("<b>&'\"x"), "&lt;b&gt;&amp;&#x27;&quot;x")

@@ -17,6 +17,7 @@ collector writes nothing and exits non-zero, so the day is simply not published.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -243,6 +244,34 @@ def load_previous_instances() -> dict[str, dict]:
     return {row["type"]: row for row in payload.get("instances", [])}
 
 
+def load_previous_meta() -> dict:
+    path = DATA / "latest" / "meta.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def fingerprint(rows: list[dict], fields: tuple[str, ...]) -> str:
+    """Stable hash of the prices we actually publish, used to detect an upstream that has
+    stopped publishing new figures (identical payload on consecutive days)."""
+    parts = []
+    for row in sorted(rows, key=lambda r: r["type"]):
+        parts.append("|".join(str(row.get(f)) for f in fields))
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
+
+
+def hash_spot_regions(regions: dict[str, dict[str, float]]) -> str:
+    """Hash the {region: {type: price}} structure stored in the daily spot history files."""
+    parts = []
+    for region in sorted(regions):
+        for itype in sorted(regions[region]):
+            parts.append(f"{region}|{itype}|{regions[region][itype]}")
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
+
+
 def load_previous_spot_history(today: date) -> dict[str, dict]:
     """Most recent spot history file before `today`."""
     hist = DATA / "history" / "spot"
@@ -361,6 +390,16 @@ def main() -> int:
 
     collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     previous = load_previous_instances()
+    previous_meta = load_previous_meta()
+
+    # ---- upstream freshness -------------------------------------------------
+    # Some upstream snapshots are served unchanged for longer than a day (observed with
+    # spot prices). Detect it instead of implying a live market: the site must be able to
+    # say "the source has not published new figures since <date>".
+    payload_sha = fingerprint(primary_rows,
+                              ("type", "od_hour", "spot_hour", "r1y_hour", "r3y_hour"))
+    spot_sha = fingerprint([r for r in primary_rows if r["spot_hour"]],
+                           ("type", "spot_hour"))
 
     # ---- on-demand changes for the primary region ------------------------
     od_changes = []
@@ -391,6 +430,32 @@ def main() -> int:
 
     prev_spot = load_previous_spot_history(today)
     prev_prices = prev_spot.get("regions", {})
+
+    # ---- upstream freshness -------------------------------------------------
+    # Some upstream snapshots are served unchanged for longer than a day (observed with spot
+    # prices). Detect that from artefacts committed to the repo -- the previous day's spot
+    # history and the previous meta -- so it is reproducible in CI, and let the site say
+    # "the source has not published new figures since <date>" instead of implying a live market.
+    today_spot_sha = hash_spot_regions(spot_regions)
+    prev_spot_sha = hash_spot_regions(prev_prices) if prev_prices else None
+    spot_payload_same = bool(prev_spot_sha) and prev_spot_sha == today_spot_sha
+    payload_same = bool(previous_meta) and previous_meta.get("payload_sha256") == payload_sha
+    upstream_unchanged = bool(payload_same or spot_payload_same)
+    if upstream_unchanged:
+        candidates = [d for d in (prev_spot.get("date"),
+                                  previous_meta.get("upstream_since"),
+                                  previous_meta.get("date")) if d]
+        upstream_since = min(candidates) if candidates else iso
+        upstream_unchanged_days = int(previous_meta.get("upstream_unchanged_days") or 0) + 1
+    else:
+        upstream_unchanged_days = 0
+        upstream_since = iso
+
+    if upstream_unchanged:
+        log(f"note: upstream returned an identical payload to the snapshot first seen "
+            f"{upstream_since} ({upstream_unchanged_days} consecutive unchanged collection(s)); "
+            f"the site will state the source has not republished rather than implying live prices")
+
     spot_movers = []
     for region, picked in spot_regions.items():
         before = prev_prices.get(region, {})
@@ -414,6 +479,9 @@ def main() -> int:
         "retired_instance_types": retired_types,
         "spot_movers": spot_movers,
         "compared_against": prev_spot.get("date"),
+        "upstream_unchanged": upstream_unchanged,
+        "upstream_unchanged_days": upstream_unchanged_days,
+        "upstream_since": upstream_since,
     }
     write_json(DATA / "changes" / f"{iso}.json", changes_payload)
 
@@ -424,6 +492,16 @@ def main() -> int:
     })
 
     digest = build_digest(raw_regions, collected_at)
+    digest.update({
+        "payload_sha256": payload_sha,
+        "spot_sha256": spot_sha,
+        "today_spot_watchlist_sha256": today_spot_sha,
+        "previous_spot_watchlist_sha256": prev_spot_sha,
+        "spot_prices_unchanged": spot_payload_same,
+        "upstream_unchanged": upstream_unchanged,
+        "upstream_unchanged_days": upstream_unchanged_days,
+        "upstream_since": upstream_since,
+    })
     write_json(snapshot_path, digest)
 
     # ---- current state (overwritten daily) ------------------------------
@@ -461,6 +539,14 @@ def main() -> int:
         "retired_instance_types": len(retired_types),
         "spot_movers": len(spot_movers),
         "spot_history_regions": sorted(spot_regions),
+        "payload_sha256": payload_sha,
+        "spot_sha256": spot_sha,
+        "today_spot_watchlist_sha256": today_spot_sha,
+        "previous_spot_watchlist_sha256": prev_spot_sha,
+        "spot_prices_unchanged": spot_payload_same,
+        "upstream_unchanged": upstream_unchanged,
+        "upstream_unchanged_days": upstream_unchanged_days,
+        "upstream_since": upstream_since,
     })
 
     # ---- stable machine-readable endpoints (published through GitHub raw)
@@ -494,7 +580,6 @@ def main() -> int:
         f"{len(od_changes)} on-demand changes, {len(new_types)} new, "
         f"{len(retired_types)} retired, {len(spot_movers)} spot movers")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

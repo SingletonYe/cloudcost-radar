@@ -717,6 +717,25 @@ class Builder:
         (self.out / "404.html").write_text(self.render_page(page), encoding="utf-8")
 
     # -- shared fragments --------------------------------------------------
+    def freshness_notice(self) -> str:
+        """Rendered when the upstream source has not republished since an earlier snapshot.
+
+        The site must never dress up an unchanged upstream snapshot as a live market.
+        """
+        if not self.meta.get("upstream_unchanged"):
+            return ""
+        since = human_date(self.meta.get("upstream_since"))
+        days = self.meta.get("upstream_unchanged_days") or 1
+        return (
+            '<div class="notice"><strong>Source status:</strong> the upstream price source has not '
+            f'published a new snapshot since {esc(since)}, and today\'s collection returned figures '
+            f'identical to that snapshot ({esc(days)} consecutive unchanged collection(s)). On-demand '
+            'list prices rarely move day to day, but the <em>spot</em> prices in this dataset are as of '
+            f'{esc(since)}, not today. Collection still runs daily and the new figures will be published '
+            'the moment the source republishes. This site will not present an unchanged snapshot as '
+            'market movement.</div>'
+        )
+
     def ad_slot(self, key: str) -> str:
         ads = self.site.get("ads", {})
         if not ads.get("enabled") or not ads.get("client") or not ads.get("slots", {}).get(key):

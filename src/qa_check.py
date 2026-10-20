@@ -207,6 +207,42 @@ def check_pages(site: Path, report: Report, base_url: str) -> None:
     report.notes.append(f"note total HTML weight {page_total_bytes/1024/1024:.1f} MiB")
 
 
+def check_freshness(site: Path, report: Report) -> None:
+    """If the upstream source did not republish, the site must say so and must not imply live data."""
+    meta_path = DATA / "latest" / "meta.json"
+    if not meta_path.exists():
+        report.fail("no collected meta.json to check upstream freshness against")
+        return
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    stale_marker = "has not published a new snapshot since"
+
+    overclaim = []
+    for path in sorted(site.rglob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        rel = "/" + str(path.relative_to(site))
+        for phrase in ("today's live prices", "live spot prices", "prices updated in real time"):
+            if phrase in text:
+                overclaim.append(f"{rel}: claims '{phrase}'")
+    report.check(not overclaim, f"no page implies a live market ({len(overclaim)} claims)")
+    for hit in overclaim[:5]:
+        report.fail(f"  {hit}")
+
+    if not meta.get("upstream_unchanged"):
+        report.notes.append("note upstream published a fresh payload on this collection")
+        return
+    candidates = ["index.html", "spot.html", "instances.html", "pricing-changes.html",
+                  "instances/m7i.large.html"]
+    for rel in candidates:
+        path = site / rel
+        if not path.exists():
+            continue
+        report.check(stale_marker in path.read_text(encoding="utf-8"),
+                     f"{rel} discloses that the upstream has not republished "
+                     f"(unchanged since {meta.get('upstream_since')})")
+    report.check(bool(meta.get("upstream_since")) and bool(meta.get("upstream_unchanged_days")),
+                 "meta records when the upstream payload was first seen and for how many collections")
+
+
 def check_sitemap(site: Path, report: Report, base_url: str) -> None:
     sitemap = site / "sitemap.xml"
     robots = site / "robots.txt"
@@ -292,6 +328,7 @@ def main() -> int:
     base_url = site_cfg["base_url"]
 
     check_data(report)
+    check_freshness(site, report)
     check_pages(site, report, base_url)
     check_sitemap(site, report, base_url)
     check_config_and_ads(site, report)

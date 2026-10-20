@@ -55,7 +55,7 @@ def build_home(b: Builder) -> None:
                  ("Change", True)], mover_rows)
         if mover_rows else
         '<p class="muted">No spot move of 1% or more was recorded in the last collection. '
-        'The spot tables below still show today\'s live prices.</p>'
+        'The tables below show the most recent figures the source has published.</p>'
     )
 
     picks = []
@@ -114,6 +114,7 @@ the history is permanent, and every number on this page is the list price as pub
 on {esc(human_date(b.today))}.</p>
 <div class="grid c4" style="margin:20px 0">{stats}</div>
 {b.ad_slot('home_top')}
+{b.freshness_notice()}
 <h2>Today's biggest spot price drops</h2>
 <p class="muted">Spot capacity is the same hardware at a discount, with the risk that AWS reclaims it.
 These are the largest drops recorded between the last two collections.</p>
@@ -210,6 +211,7 @@ def build_instances_index(b: Builder) -> None:
 <p class="lede">Every instance type in US East (N. Virginia) with its published on-demand hourly and
 monthly price, the current spot price, and the 1-year reserved rate. Prices collected
 {esc(human_date(b.today))}. Sort by clicking a column header; filter by family, size or price.</p>
+{b.freshness_notice()}
 <div class="grid c2" style="margin:16px 0">
   <div class="card">
     <label for="instance-search">Search instance type</label>
@@ -368,6 +370,7 @@ family. Prices below were read from the published AWS price list on {esc(human_d
   {b.stat("Spot", hourly(best_spot), esc(row.get('spot_reclaim') or 'reclaim risk unknown'))}
   {b.stat("1y reserved", hourly(row['r1y_hour']), "no upfront")}
 </div>
+{b.freshness_notice()}
 <h2>All purchase models</h2>
 {price_table}
 <h2>Specification</h2>
@@ -502,6 +505,7 @@ def build_spot(b: Builder) -> None:
 them at two minutes' notice. CloudCost Radar records {len(watch_rows):,} spot prices in
 {b.instances_doc.get('region_name','US East (N. Virginia)')} every day and keeps the history, so you
 can see whether today's price is actually a good deal or just normal noise.</p>
+{b.freshness_notice()}
 <div class="grid c4" style="margin:18px 0">
   {b.stat("Spot prices today", f"{len(watch_rows):,}", "in the primary region")}
   {b.stat("Drops recorded", str(len(movers_down)), "moves of 1% or more")}
@@ -835,7 +839,10 @@ def build_alternatives(b: Builder) -> None:
                 price, compare,
             ])
         verified_count = len([p for p in plans if p.get("price_status") == "verified"])
-        note = (f'{verified_count} of {len(plans)} listed sizes have a price verified by this site'
+        verified_dates = sorted(p.get("verified_at") for p in plans
+                                if p.get("price_status") == "verified" and p.get("verified_at"))
+        note = (f'{verified_count} of {len(plans)} listed sizes have a price verified by this site; '
+                f'last checked {human_date_short(verified_dates[-1])}'
                 if verified_count else
                 'This provider renders prices in JavaScript, so no number is shown here until it can be '
                 'read reliably')
@@ -1081,16 +1088,22 @@ def build_changes(b: Builder) -> None:
             extra += f'<p class="small">Retired instance types: {", ".join(esc(t) for t in retired[:30])}</p>'
         blocks.append(f'<h2>{esc(human_date(doc.get("date", path.stem)))}</h2>{extra}{table}')
     if not blocks:
-        blocks.append(
-            f'<p class="muted">The change log is empty because the baseline snapshot was collected on '
-            f'{esc(human_date(b.today))} and daily comparisons begin with the next collection. '
-            f'This page fills in automatically from tomorrow.</p>')
+        baseline = f'<p class="muted">The change log is empty: the baseline snapshot was collected on ' \
+                   f'{esc(human_date(b.today))} and daily comparisons begin with the next collection.</p>'
+        unchanged = ''
+        if b.meta.get("upstream_unchanged"):
+            unchanged = (f'<p class="muted">Additionally, the upstream source has not republished since '
+                         f'{esc(human_date(b.meta.get("upstream_since")))}: consecutive collections are '
+                         f'returning an identical dataset. There is genuinely nothing to report yet, and '
+                         f'this page is deliberately not padded with invented movement.</p>')
+        blocks.append(baseline + unchanged)
 
     body = f"""
 <h1>AWS price change log</h1>
 <p class="lede">AWS does not send a notification when an instance type gets cheaper, when a new
 family appears, or when spot capacity quietly gets more expensive. This log records what moved
 between consecutive daily collections, newest first.</p>
+{b.freshness_notice()}
 {''.join(blocks[:20])}
 <h2>Why this exists</h2>
 <p class="muted">The cheapest instance for a workload is not a fixed answer: previous-generation

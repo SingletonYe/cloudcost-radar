@@ -16,11 +16,11 @@
       "verify_url": "https://www.digitalocean.com/pricing/droplets",
       "notes": "SSD-backed droplets with hourly billing and a generous free egress allowance.",
       "plans": [
-        { "id": "s-1vcpu-1gb", "vcpu": 1, "ram_gb": 1, "disk_gb": 25, "transfer_gb": 1000, "price_usd_month": 6.0, "price_status": "verified", "verified_at": "2026-10-19" },
-        { "id": "s-2vcpu-2gb", "vcpu": 2, "ram_gb": 2, "disk_gb": 60, "transfer_gb": 3000, "price_usd_month": 18.0, "price_status": "verified", "verified_at": "2026-10-19" },
-        { "id": "s-2vcpu-4gb", "vcpu": 2, "ram_gb": 4, "disk_gb": 80, "transfer_gb": 4000, "price_usd_month": 24.0, "price_status": "verified", "verified_at": "2026-10-19" },
-        { "id": "s-4vcpu-8gb", "vcpu": 4, "ram_gb": 8, "disk_gb": 160, "transfer_gb": 5000, "price_usd_month": 48.0, "price_status": "verified", "verified_at": "2026-10-19" },
-        { "id": "s-8vcpu-16gb", "vcpu": 8, "ram_gb": 16, "disk_gb": 320, "transfer_gb": 6000, "price_usd_month": 96.0, "price_status": "verified", "verified_at": "2026-10-19" }
+        { "id": "s-1vcpu-1gb", "vcpu": 1, "ram_gb": 1, "disk_gb": 25, "transfer_gb": 1000, "price_usd_month": 6.0, "price_status": "verified", "verified_at": "2026-10-20" },
+        { "id": "s-2vcpu-2gb", "vcpu": 2, "ram_gb": 2, "disk_gb": 60, "transfer_gb": 3000, "price_usd_month": 18.0, "price_status": "verified", "verified_at": "2026-10-20" },
+        { "id": "s-2vcpu-4gb", "vcpu": 2, "ram_gb": 4, "disk_gb": 80, "transfer_gb": 4000, "price_usd_month": 24.0, "price_status": "verified", "verified_at": "2026-10-20" },
+        { "id": "s-4vcpu-8gb", "vcpu": 4, "ram_gb": 8, "disk_gb": 160, "transfer_gb": 5000, "price_usd_month": 48.0, "price_status": "verified", "verified_at": "2026-10-20" },
+        { "id": "s-8vcpu-16gb", "vcpu": 8, "ram_gb": 16, "disk_gb": 320, "transfer_gb": 6000, "price_usd_month": 96.0, "price_status": "verified", "verified_at": "2026-10-20" }
       ]
     },
     {
