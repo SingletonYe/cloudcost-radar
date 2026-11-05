@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-05",
+  "checked": 10,
+  "unreachable": [
+    "vultr",
+    "linode",
+    "contabo"
+  ],
+  "changes": [
+    {
+      "provider": "hetzner",
+      "url": "https://www.hetzner.com/cloud/",
+      "detected": "2026-11-05",
+      "reason": "price tokens changed",
+      "previous_tokens": 4,
+      "current_tokens": 4
+    },
+    {
+      "provider": "runpod",
+      "url": "https://www.runpod.io/pricing",
+      "detected": "2026-11-05",
+      "reason": "price tokens changed",
+      "previous_tokens": 31,
+      "current_tokens": 40
+    }
+  ],
+  "verified_dates_refreshed": [
+    "s-1vcpu-1gb",
+    "s-2vcpu-2gb",
+    "s-2vcpu-4gb",
+    "s-4vcpu-8gb",
+    "s-8vcpu-16gb"
+  ]
+}
