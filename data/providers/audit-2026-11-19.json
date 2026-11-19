@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-19",
+  "checked": 10,
+  "unreachable": [
+    "vultr",
+    "linode",
+    "scaleway",
+    "contabo"
+  ],
+  "changes": [
+    {
+      "provider": "digitalocean",
+      "url": "https://www.digitalocean.com/pricing/droplets",
+      "detected": "2026-11-19",
+      "reason": "price tokens changed",
+      "previous_tokens": 36,
+      "current_tokens": 40
+    }
+  ],
+  "verified_dates_refreshed": []
+}
